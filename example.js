@@ -2,19 +2,26 @@
 
 var DHTSpider = require('./p2pspider/dhtspider');
 var BTClient = require('./p2pspider/btclient');
+var fs = require('fs');
 
-var btclient = new BTClient({ timeout: 1000 * 10 });
+var btclient = new BTClient({timeout: 1000 * 10});
 btclient.on('complete', (metadata, infohash, rinfo) => {
 
     // metadata.info 含有资源名字, 资源大小, 资源文件列表等信息.
-    
+
     var name = metadata.info.name || metadata.info['utf-8.name'];
     if (name) {
-        console.log('\n');
-        console.log('name: %s', name.toString());
-        console.log('from: %s:%s', rinfo.address, rinfo.port );
-        console.log('link: magnet:?xt=urn:btih:%s', infohash.toString('hex'));
+        var data = '\n\nname: ' + name.toString();
+        data += '\nfrom: ' + rinfo.address + rinfo.port;
+        data += '\nlink: magnet:?xt=urn:btih:' + infohash.toString('hex');
+        console.log(data);
+        fs.appendFile('./file/file', data, 'utf8', function (err) {
+            if (err) {
+                console.log(err);
+            }
+        });
     }
+
 });
 
 DHTSpider.start({
